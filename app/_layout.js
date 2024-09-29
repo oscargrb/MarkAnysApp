@@ -4,24 +4,21 @@ import Constants from "expo-constants";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
-import logo from "../assets/pokelogo.png";
+import logo from "../assets/logo.png";
 
 export default function Layout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: "#f59e0b" },
+        headerStyle: { backgroundColor: "#1e293b" },
+        headerShadowVisible: false,
         headerTitle: "",
         headerLeft: () => (
-          <Image source={logo} style={{ width: 100, height: 50 }} />
-        ),
-        headerRight: () => (
-          <Link
-            href={"/about"}
-            className="text-center text-gray-900 underline text-lg"
-          >
-            About
-          </Link>
+          <Image
+            resizeMode="contain"
+            source={logo}
+            style={{ width: 30, height: 30 }}
+          />
         ),
       }}
     />
