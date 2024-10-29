@@ -1,23 +1,49 @@
 import { Stack, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useEffect, useState } from "react";
 import Screen from "../Components/Screen";
+import * as SecureStore from "expo-secure-store";
+import { PhotoVisor } from "../Components/PhotoVisor";
 
 export default function Details() {
-  const [pokeInfo, setPokeInfo] = useState(null);
   const { id } = useLocalSearchParams();
+  const [info, setInfo] = useState(null);
+  const [photoVisor, setPhotoVisor] = useState(null);
 
   useEffect(() => {
     findInfo();
   }, [id]);
 
   const findInfo = async () => {
-    const pokeInfo = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
-      headers: "GET",
-    });
-    const results = await pokeInfo.json();
+    try {
+      let tkn = await SecureStore.getItemAsync("tkn");
+      const data = await fetch(
+        "http://192.168.1.114:8080/shelf/get_evidence/" + id,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: tkn,
+          },
+          credentials: "include",
+          mode: "cors",
+          method: "GET",
+        },
+      );
 
-    setPokeInfo(results);
+      const result = await data.json();
+
+      console.log(result.evidence);
+
+      setInfo(result.evidence);
+    } catch (e) {}
   };
 
   return (
@@ -26,58 +52,64 @@ export default function Details() {
         options={{
           headerLeft: () => {},
           headerRight: () => {},
+          headerBackVisible: false,
           headerStyle: { backgroundColor: "#f59e0b" },
           headerTintColor: "#333",
-          headerTitle: `Pokemon Details`,
+          headerTitle: "Detalles Evidencia ",
         }}
       />
-      {pokeInfo == null ? (
-        <ActivityIndicator color={"#fff"} size={"large"} />
+
+      {!info ? (
+        <ActivityIndicator />
       ) : (
-        <View>
-          <ScrollView>
-            <View className="flex-col justify-center items-center mb-3">
-              <View className="bg-white rounded-full p-5 justify-center items-center">
+        <View className="flex gap-3">
+          <View>
+            <Text className="text-white ml-1">ID</Text>
+            <Text className="text-white border-2 h-9 p-2 border-white rounded-md">
+              {id}
+            </Text>
+          </View>
+          <View>
+            <Text className="text-white ml-1">Punto de Venta</Text>
+            <Text className="text-white border-2 h-9 p-2 border-white rounded-md">
+              {info.Point_Sale.Name}
+            </Text>
+          </View>
+          <View>
+            <Text className="text-white ml-1">Fecha/Hora</Text>
+            <Text className="text-white border-2 h-9 p-2 border-white rounded-md">
+              {info.createdAt}
+            </Text>
+          </View>
+          <View>
+            <Text className="text-white ml-1">Usuario</Text>
+            <Text className="text-white border-2 h-9 p-2 border-white rounded-md">
+              {info.User.Username}
+            </Text>
+          </View>
+          <View>
+            <Text className="text-white ml-1">Geolocation</Text>
+            <Text className="text-white border-2 h-9 p-2 border-white rounded-md">
+              {info.Geolocation}
+            </Text>
+          </View>
+          <ScrollView horizontal>
+            {info.Shelf_Evidence_Media.map((i) => (
+              <Pressable onPress={() => setPhotoVisor(i.Photo)}>
                 <Image
-                  source={{
-                    uri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokeInfo.id}.png`,
-                  }}
-                  width={150}
-                  height={150}
+                  source={{ uri: i.Photo }}
+                  className="w-40 h-80"
+                  resizeMode="contain"
                 />
-              </View>
-            </View>
-            <Text
-              className={textStyle + " font-bold text-emerald-400 text-2xl"}
-            >
-              {pokeInfo.name}
-            </Text>
-            <Text className={textStyle + " font-bold text-amber-500"}>
-              Abilities:{" "}
-            </Text>
-            {pokeInfo.abilities.map((item) => (
-              <Text key={item.ability.name} className={textStyle}>
-                {item.ability.name}
-              </Text>
-            ))}
-            <Text className={textStyle + " font-bold text-amber-500"}>
-              Types:{" "}
-            </Text>
-            {pokeInfo.types.map((item) => (
-              <Text key={item.type.name} className={textStyle}>
-                {item.type.name}
-              </Text>
-            ))}
-            <Text className={textStyle + " font-bold text-amber-500"}>
-              Moves:{" "}
-            </Text>
-            {pokeInfo.moves.map((item) => (
-              <Text key={item.move.name} className={textStyle}>
-                {item.move.name}
-              </Text>
+              </Pressable>
             ))}
           </ScrollView>
         </View>
+      )}
+      {photoVisor ? (
+        <PhotoVisor photo={photoVisor} disableVisor={setPhotoVisor} />
+      ) : (
+        <></>
       )}
     </Screen>
   );

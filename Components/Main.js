@@ -37,7 +37,7 @@ export default function Main() {
       `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`,
       {
         headers: "GET",
-      }
+      },
     );
 
     const results = await find.json();

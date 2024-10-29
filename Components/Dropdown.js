@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 
-const Dropdown = ({ options, onSelect }) => {
+const Dropdown = ({ options, onSelect, placeholder }) => {
   const [visible, setVisible] = useState(false);
   const [selected, setSelected] = useState(null);
 
@@ -22,10 +22,10 @@ const Dropdown = ({ options, onSelect }) => {
     <View>
       <TouchableOpacity
         onPress={() => setVisible(true)}
-        style={styles.dropdown}
+        className="text-black h-10 border-white p-2 bg-white rounded-md flex items-start justify-center"
       >
-        <Text className="text-white">
-          {selected ? selected.label : "Select an option"}
+        <Text className="text-black">
+          {selected ? selected.label : placeholder}
         </Text>
       </TouchableOpacity>
       <Modal visible={visible} transparent={true} animationType="slide">
